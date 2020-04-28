@@ -1,0 +1,3 @@
+# these are the files that are copied in during the rpm build
+/fs/usr/horizon/bin/anax
+/fs/usr/horizon/samples/

@@ -37,7 +37,7 @@ Open-horizon edge node agent
 # The $RPM_BUILD_ROOT is a simulated root file system and usually has a value like: ~/rpmbuild/BUILDROOT/horizon-cli-1.0.0-1.x86_64
 # Following the LSB Filesystem Hierarchy Standard: https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/horizon/bin $RPM_BUILD_ROOT/etc/horizon
+mkdir -p $RPM_BUILD_ROOT/usr/horizon/bin $RPM_BUILD_ROOT/etc/horizon $RPM_BUILD_ROOT/etc/bash_completion.d
 cp -a fs/* $RPM_BUILD_ROOT/
 
 %files
@@ -45,6 +45,24 @@ cp -a fs/* $RPM_BUILD_ROOT/
 #%doc LICENSE COPYRIGHT
 /usr/horizon
 /etc/horizon
+/etc/bash_completion.d
+
+%post
+# Runs after the pkg is installed
+if [[ ! -e "/usr/bin/hzn" ]]; then
+	ln -s /usr/horizon/bin/hzn /usr/bin/hzn
+fi
+if [[ ! -e "/usr/bin/horizon-container" ]]; then
+	ln -s /usr/horizon/bin/horizon-container /usr/bin/horizon-container
+fi
+
+%postun
+# Runs after the pkg is uninstalled. $1 == 0 means this is a complete removal, not an update.
+if [ "$1" = "0" ]; then
+	# Remove the sym links we created during install of this pkg
+	rm -f /usr/bin/hzn
+	rm -f /usr/bin/horizon-container
+fi
 
 %clean
 # This step happens *after* the %files packaging

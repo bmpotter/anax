@@ -1,4 +1,5 @@
 SHELL ?= /bin/bash -e
+#todo: not sure where/how to get this automatically
 export VERSION ?= 2.26.0
 export RELEASE ?= 1
 # rpmbuild does not give us a good way to set topdir, so use the default location
@@ -8,10 +9,13 @@ RPMNAME ?= horizon-cli
 
 # Remember to up VERSION above. If building the rpm on mac, first: brew install rpm
 #todo: currently you have to do a full make in the top dir *before* building this target. Use: (cd ../../.. && make)
-# Note: during rpmbuild, get this benign msg: error: Couldn't exec /usr/local/Cellar/rpm/4.14.1_1/lib/rpm/elfdeps: No such file or directory
+# Note: during rpmbuild, you may get this benign msg: error: Couldn't exec /usr/local/Cellar/rpm/4.14.1_1/lib/rpm/elfdeps: No such file or directory
 rpmbuild:
-	cd ../../.. && opsys=Linux arch=amd64 make cli/hzn
+	opsys=Linux arch=amd64 $(MAKE) -C ../../.. cli/hzn
+	mkdir -p fs/usr/horizon/bin fs/etc/bash_completion.d
 	cp ../../../cli/hzn fs/usr/horizon/bin
+	cp ../../../anax-in-container/horizon-container fs/usr/horizon/bin
+	cp ../../../cli/bash_completion/hzn_bash_autocomplete.sh fs/etc/bash_completion.d  #todo: also copy in the man page
 	mkdir -p $(RPMROOT)/{SOURCES,SRPMS,SRPMS}
 	rm -f $(RPMNAME)-$(VERSION); ln -s . $(RPMNAME)-$(VERSION)  # so the tar file files can have this prefix
 	rm -f $(RPMROOT)/SOURCES/$(RPMNAME)-*.tar.gz
