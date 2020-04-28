@@ -8,7 +8,7 @@ Source: horizon-cli-%{version}.tar.gz
 Packager: Open-horizon
 BuildArch: x86_64
 Provides: horizon-cli = %{version}
-Requires: docker
+#todo: restore: Requires: docker
 
 #Prefix: /usr/horizon
 #Vendor: ?
@@ -16,7 +16,7 @@ Requires: docker
 #BuildRoot: ?
 
 %description
-Open-horizon edge node agent
+Open-horizon command line interface
 
 %prep
 %setup -q
@@ -45,7 +45,7 @@ cp -a fs/* $RPM_BUILD_ROOT/
 #%doc LICENSE COPYRIGHT
 /usr/horizon
 /etc/horizon
-/etc/bash_completion.d
+/etc/bash_completion.d/hzn_bash_autocomplete.sh
 
 %post
 # Runs after the pkg is installed

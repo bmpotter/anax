@@ -9,6 +9,8 @@ Packager: Open-horizon
 BuildArch: x86_64
 Provides: horizon = %{version}
 Requires: horizon-cli docker
+# for testing installation in docker container:
+#Requires: horizon-cli
 
 #Prefix: /usr/horizon
 #Vendor: ?
@@ -50,12 +52,14 @@ cp -a fs/* $RPM_BUILD_ROOT/
 
 %post
 # Runs after the pkg is installed
-systemctl daemon-reload
-systemctl enable horizon.service
-if systemctl --quiet is-active horizon.service; then
-	systemctl stop horizon.service   # in case this was an update
-fi
-systemctl start horizon.service
+#if systemctl > /dev/null 2>&1; then  # for testing installation in docker container
+	systemctl daemon-reload
+	systemctl enable horizon.service
+	if systemctl --quiet is-active horizon.service; then
+		systemctl stop horizon.service   # in case this was an update
+	fi
+	systemctl start horizon.service
+#fi
 
 %preun
 # This runs before the pkg is removed. But the way rpm updates work is the newer rpm is installed 1st (with reference counting on the files),
@@ -80,11 +84,13 @@ if [ "$1" = "0" ]; then
   fi
 
   # Now shutdown the daemon
-  if systemctl --quiet is-enabled horizon.service; then
-    systemctl disable horizon.service
-  fi
-  systemctl daemon-reload
-  systemctl reset-failed
+  #if systemctl > /dev/null 2>&1; then  # for testing installation in docker container
+	  if systemctl --quiet is-enabled horizon.service; then
+		systemctl disable horizon.service
+	  fi
+	  systemctl daemon-reload
+	  systemctl reset-failed
+  #fi
 fi
 
 %postun
@@ -106,10 +112,10 @@ if [ "$1" = "0" ]; then
   fi
 
   # remove networks; some errors are expected b/c we're issuing remove command for even networks that should have already been removed by anax
-  cat /var/horizon/prerm.bridges <(echo $containers | jq -r '.NetworkSettings.Networks | keys[]') | sort | uniq | grep -v 'bridge' | xargs docker network rm 2> /dev/null
+  cat /var/horizon/prerm.bridges <<< $(echo $containers | jq -r '.NetworkSettings.Networks | keys[]') | sort | uniq | grep -v 'bridge' | xargs docker network rm 2> /dev/null
 
   # remove container images; TODO: use labels to remove infrastructure container images too once they are tagged properly upon
-  cat /var/horizon/prerm.images <(echo $containers | jq -r '.Config.Image') | sort | uniq | xargs docker rmi 2> /dev/null
+  cat /var/horizon/prerm.images <<< $(echo $containers | jq -r '.Config.Image') | sort | uniq | xargs docker rmi 2> /dev/null
 
   #todo: in the debian pkg, these cmds only run for the purge option. There doesn't seem to be an rpm equivalent
   rm -Rf /etc/horizon /var/cache/horizon /etc/default/horizon /var/tmp/horizon /var/run/horizon
