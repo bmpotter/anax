@@ -1,7 +1,7 @@
 SHELL ?= /bin/bash -e
 #todo: not sure where/how to get this automatically
 export VERSION ?= 2.26.0
-export RELEASE ?= 1
+export RELEASE ?= 3
 # rpmbuild does not give us a good way to set topdir, so use the default location
 RPMROOT ?= $(HOME)/rpmbuild
 RPMNAME ?= horizon-cli

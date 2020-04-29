@@ -1,3 +1,7 @@
+# Spec file for the horizon RPM. For info about writing spec files, see:
+#	http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+#	https://rpm-packaging-guide.github.io/
+
 Summary: Open-horizon edge agent
 Name: horizon
 Version: %{getenv:VERSION}
@@ -8,9 +12,10 @@ Source: horizon-%{version}.tar.gz
 Packager: Open-horizon
 BuildArch: x86_64
 Provides: horizon = %{version}
-Requires: horizon-cli docker
-# for testing installation in docker container:
-#Requires: horizon-cli
+
+# Note: in RHEL/CentOS 8.x, docker-ce does not automatically install cleanly.
+#	Must do this manually *before* installing this horizon pkg: https://linuxconfig.org/how-to-install-docker-in-rhel-8
+Requires: horizon-cli docker-ce iptables jq
 
 #Prefix: /usr/horizon
 #Vendor: ?
@@ -44,21 +49,22 @@ cp -a fs/* $RPM_BUILD_ROOT/
 
 %files
 #%defattr(-, root, root)
-#%doc LICENSE COPYRIGHT
+%license /usr/horizon/LICENSE.txt
+%doc /usr/horizon/README.md
+%config(noreplace) /etc/default/horizon
 /usr/horizon
 /lib/systemd/system/horizon.service
-/etc/default/horizon
 /etc/horizon
 
 %post
 # Runs after the pkg is installed
 #if systemctl > /dev/null 2>&1; then  # for testing installation in docker container
-	systemctl daemon-reload
-	systemctl enable horizon.service
-	if systemctl --quiet is-active horizon.service; then
-		systemctl stop horizon.service   # in case this was an update
-	fi
-	systemctl start horizon.service
+systemctl daemon-reload
+systemctl enable horizon.service
+if systemctl --quiet is-active horizon.service; then
+	systemctl stop horizon.service   # in case this was an update
+fi
+systemctl start horizon.service
 #fi
 
 %preun
@@ -85,11 +91,11 @@ if [ "$1" = "0" ]; then
 
   # Now shutdown the daemon
   #if systemctl > /dev/null 2>&1; then  # for testing installation in docker container
-	  if systemctl --quiet is-enabled horizon.service; then
-		systemctl disable horizon.service
-	  fi
-	  systemctl daemon-reload
-	  systemctl reset-failed
+  if systemctl --quiet is-enabled horizon.service; then
+	systemctl disable horizon.service
+  fi
+  systemctl daemon-reload
+  systemctl reset-failed
   #fi
 fi
 

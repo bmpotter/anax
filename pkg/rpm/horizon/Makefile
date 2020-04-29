@@ -1,7 +1,7 @@
 SHELL ?= /bin/bash -e
 #todo: not sure where/how to get this automatically
 export VERSION ?= 2.26.0
-export RELEASE ?= 2
+export RELEASE ?= 4
 # rpmbuild does not give us a good way to set topdir, so use the default location
 RPMROOT ?= $(HOME)/rpmbuild
 RPMNAME ?= horizon
@@ -14,6 +14,8 @@ rpmbuild:
 	opsys=Linux arch=amd64 $(MAKE) -C ../../.. anax
 	cp ../../../anax fs/usr/horizon/bin
 	cp -a ../../../cli/samples fs/usr/horizon
+	cp -a ../../../LICENSE.txt fs/usr/horizon
+	cp -a ../README.md fs/usr/horizon
 	mkdir -p $(RPMROOT)/{SOURCES,SRPMS,SRPMS}
 	rm -f $(RPMNAME)-$(VERSION); ln -s . $(RPMNAME)-$(VERSION)  # so the tar file files can have this prefix
 	rm -f $(RPMROOT)/SOURCES/$(RPMNAME)-*.tar.gz

@@ -1,3 +1,7 @@
+# Spec file for the horizon-cli RPM. For info about writing spec files, see:
+#	http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+#	https://rpm-packaging-guide.github.io/
+
 Summary: Open-horizon CLI
 Name: horizon-cli
 Version: %{getenv:VERSION}
@@ -42,9 +46,9 @@ cp -a fs/* $RPM_BUILD_ROOT/
 
 %files
 #%defattr(-, root, root)
-#%doc LICENSE COPYRIGHT
 /usr/horizon
 /etc/horizon
+#todo: cmd completion for hzn is not working. Have not figured out why yet.
 /etc/bash_completion.d/hzn_bash_autocomplete.sh
 
 %post
